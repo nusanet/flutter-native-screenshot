@@ -10,8 +10,8 @@ class FlutterNativeScreenshot {
   ///
   /// Returns [null] if an error occurs.
   /// Returns a [String] with the path of the screenshot.
-  static Future<String> takeScreenshot() async {
-    final String path = await _channel.invokeMethod('takeScreenshot');
+  static Future<String?> takeScreenshot() async {
+    final String? path = await _channel.invokeMethod('takeScreenshot');
     return path;
   }
 }

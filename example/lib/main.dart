@@ -13,7 +13,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  Widget _imgHolder;
+  Widget? _imgHolder;
 
   @override
   void initState() {
@@ -38,11 +38,11 @@ class _MyAppState extends State<MyApp> {
             RaisedButton(
               child: Text('Press to capture screenshot'),
               onPressed: () async {
-                String path = await FlutterNativeScreenshot.takeScreenshot();
+                String? path = await FlutterNativeScreenshot.takeScreenshot();
                 debugPrint('Screenshot taken, path: $path');
 
                 if (path == null || path.isEmpty) {
-                  _scaffoldKey.currentState.showSnackBar(SnackBar(
+                  _scaffoldKey.currentState!.showSnackBar(SnackBar(
                     content: Text('Error taking the screenshot :('),
                     backgroundColor: Colors.red,
                   )); // showSnackBar()
@@ -51,7 +51,7 @@ class _MyAppState extends State<MyApp> {
                 } // if error
 
                 _scaffoldKey.currentState
-                    .showSnackBar(SnackBar(content: Text('The screenshot has been saved to: $path'))); // showSnackBar()
+                    !.showSnackBar(SnackBar(content: Text('The screenshot has been saved to: $path'))); // showSnackBar()
 
                 File imgFile = File(path);
                 _imgHolder = Image.file(imgFile);

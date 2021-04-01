@@ -1,15 +1,54 @@
 # flutter_native_screenshot
 
-A new flutter plugin project.
+A Flutter plugin to take screenshot on Android & iOS. This plugin also saved screenshot as image and return a path.
 
-## Getting Started
+## Instalation
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+Add
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```
+flutter_native_screenshot: ^<latest_version>
+```
 
+to your `pubspec.yaml` file.
+
+### Android
+You must add
+
+```
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+```
+
+to your `AndroidManifest.xml` inside `android/src/main/` directory.
+
+Also you need to add a property to `application` tag to fix an issue with permissions writing to `EXTERNAL_STORAGE`:
+
+```
+android:requestLegacyExternalStorage="true"
+```
+
+### iOS
+If don't add
+
+```
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>Take pretty screenshots and save it to the PhotoLibrary.</string>
+```
+
+to your `info.plist` file inside `ios/Runner` directory, the application will crash.
+
+## Use
+
+Import the library:
+
+```
+import 'package:flutter_native_screenshot/flutter_native_screenshot.dart';
+```
+
+and take a screenshot:
+
+```
+String path = await FlutterNativeScreenshot.takeScreenshot()
+```
+
+In error case the function returns `null` and the screenshot path if success.
