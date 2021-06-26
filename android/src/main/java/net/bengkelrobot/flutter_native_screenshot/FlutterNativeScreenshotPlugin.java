@@ -130,13 +130,13 @@ public class FlutterNativeScreenshotPlugin implements FlutterPlugin, MethodCallH
   // MethodCall, manage stuff coming from Dart
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-    if( !permissionToWrite() ) {
+    /*if( !permissionToWrite() ) {
       Log.println(Log.INFO, TAG, "Permission to write files missing!");
 
       result.success(null);
 
       return;
-    } // if cannot write
+    }*/ // if cannot write
 
     if( !call.method.equals("takeScreenshot") ) {
       Log.println(Log.INFO, TAG, "Method not implemented!");
