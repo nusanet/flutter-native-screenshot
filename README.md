@@ -1,54 +1,46 @@
-# flutter_native_screenshot
+# Flutter Native Screenshot
 
-A Flutter plugin to take screenshot on Android & iOS. This plugin also saved screenshot as image and return a path.
+Plugin ini berfungsi untuk mengambil screenshot dari layar device yang sedang aktif dengan cara menggunakan kode native-nya langsung.
+Untuk saat ini support untuk platform Android & iOS.
 
-## Instalation
+## Cara Instalasi
 
-Add
+Buka file **pubspec.yaml** dan tambahkan baris kode berikut didalam `dependencies`.
 
 ```
-flutter_native_screenshot: ^<latest_version>
+flutter_native_screenshot: ^<versi_terbaru>
 ```
 
-to your `pubspec.yaml` file.
+*Catatan: Harap ganti tulisan <versi_terbaru> dengan nilai versi terbaru dari plugin ini.*
 
 ### Android
-You must add
+
+Untuk platform Android, Anda harus menambahkan permission berikut kedalam file **AndroidManifest.xml**.
 
 ```
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 ```
 
-to your `AndroidManifest.xml` inside `android/src/main/` directory.
-
-Also you need to add a property to `application` tag to fix an issue with permissions writing to `EXTERNAL_STORAGE`:
+Dan jangan lupa tambahkan property berikut kedalam tag `application` didalam file **AndroidManifest.xml**.
 
 ```
-android:requestLegacyExternalStorage="true"
+android;requestLegacyExternalStorage="true"
 ```
 
 ### iOS
-If don't add
+
+Untuk platform iOS, Anda harus menambahkan permission berikut kedalam file **Info.plist**.
 
 ```
 <key>NSPhotoLibraryAddUsageDescription</key>
 <string>Take pretty screenshots and save it to the PhotoLibrary.</string>
 ```
 
-to your `info.plist` file inside `ios/Runner` directory, the application will crash.
+### Contoh Pemakaian
 
-## Use
+Untuk contoh pemakaian silakan lihat didalam projek **example** ya.
 
-Import the library:
+### Catatan Penting
 
-```
-import 'package:flutter_native_screenshot/flutter_native_screenshot.dart';
-```
-
-and take a screenshot:
-
-```
-String path = await FlutterNativeScreenshot.takeScreenshot()
-```
-
-In error case the function returns `null` and the screenshot path if success.
+Perlu diketahui bahwa di plugin ini tidak meng-handle proses pengecekan runtime permission.
+Oleh karena itu, pastikan Anda mengecek terlebih dahulu runtime permission-nya menggunakan plugin `permission_handler`.
