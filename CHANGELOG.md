@@ -1,3 +1,7 @@
+## 1.1.2
+
+* Migrasikan repo projek ke organisasi /nusanet.
+
 ## 1.1.1
 
 * Perbaikan dukungan untuk Android 11
