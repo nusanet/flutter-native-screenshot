@@ -1,6 +1,6 @@
 name: flutter_native_screenshot
 description: A Flutter plugin to take screenshot on Android & iOS with natively code.
-version: 1.1.2
+version: 1.2.0
 homepage: https://github.com/nusanet/flutter-native-screenshot
 repository: https://github.com/nusanet/flutter-native-screenshot
 issue_tracker: https://github.com/nusanet/flutter-native-screenshot/issues
