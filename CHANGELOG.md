@@ -1,3 +1,7 @@
+## 1.2.0
+
+* Update plugin support Flutter versi 3.32.8.
+
 ## 1.1.2
 
 * Migrasikan repo projek ke organisasi /nusanet.
