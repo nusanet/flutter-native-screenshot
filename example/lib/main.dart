@@ -29,7 +29,7 @@ class _MyAppState extends State<MyApp> {
           appBar: AppBar(
             title: Text('Flutter Native Screenshot'),
           ),
-          bottomNavigationBar: ButtonBar(
+          bottomNavigationBar: OverflowBar(
             alignment: MainAxisAlignment.center,
             children: <Widget>[
               ElevatedButton(
