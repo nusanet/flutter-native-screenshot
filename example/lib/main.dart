@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_native_screenshot/flutter_native_screenshot.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 void main() => runApp(MyApp());
 
@@ -25,36 +24,26 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Flutter Native Screenshot'),
-        ),
-        bottomNavigationBar: ButtonBar(
-          alignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              child: Text('Press to capture screenshot'),
-              onPressed: () async {
-                Map<Permission, PermissionStatus> resultPermission = await [
-                  Permission.storage,
-                  Permission.photos,
-                ].request();
-                final resultPermissionStorage = resultPermission[Permission.storage];
-                final resultPermissionPhotos = resultPermission[Permission.photos];
-                if (resultPermissionStorage == PermissionStatus.granted &&
-                    resultPermissionPhotos == PermissionStatus.granted) {
+      home: SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('Flutter Native Screenshot'),
+          ),
+          bottomNavigationBar: ButtonBar(
+            alignment: MainAxisAlignment.center,
+            children: <Widget>[
+              ElevatedButton(
+                child: Text('Press to capture screenshot'),
+                onPressed: () async {
                   _doTakeScreenshot();
-                  return;
-                } else {
-                  _showSnackBar('Permission not granted');
-                }
-              },
-            )
-          ],
-        ),
-        body: Container(
-          constraints: BoxConstraints.expand(),
-          child: _imgHolder,
+                },
+              )
+            ],
+          ),
+          body: Container(
+            constraints: BoxConstraints.expand(),
+            child: _imgHolder,
+          ),
         ),
       ),
     );

@@ -31,8 +31,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugin.common.PluginRegistry.Registrar;
-import io.flutter.view.FlutterView;
+import io.flutter.plugin.common.MethodChannel.Result;
 
 /**
  * FlutterNativeScreenshotPlugin
@@ -84,20 +83,8 @@ public class FlutterNativeScreenshotPlugin
         ); // initPlugin()
     } // onAttachedToEngine()
 
-    // Old v1 register method
-    // FIX: Make instance variables set with the old method
-    public static void registerWith(Registrar registrar) {
-        Log.println(Log.INFO, TAG, "Using *OLD* registrar method!");
+    // Old v1 register method removed
 
-        FlutterNativeScreenshotPlugin instance = new FlutterNativeScreenshotPlugin();
-
-        instance.initPlugin(
-                registrar.context(),
-                registrar.messenger(),
-                registrar.activity(),
-                registrar.view()
-        ); // initPlugin()
-    } // registerWith()
 
 
     // Activity condensed methods
@@ -204,9 +191,7 @@ public class FlutterNativeScreenshotPlugin
             view.setDrawingCacheEnabled(true);
 
             Bitmap bitmap = null;
-            if (this.renderer.getClass() == FlutterView.class) {
-                bitmap = ((FlutterView) this.renderer).getBitmap();
-            } else if (this.renderer.getClass() == FlutterRenderer.class) {
+            if (this.renderer.getClass() == FlutterRenderer.class) {
                 bitmap = ((FlutterRenderer) this.renderer).getBitmap();
             }
 
