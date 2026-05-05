@@ -1,22 +1,15 @@
 package net.bengkelrobot.flutter_native_screenshot;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.util.Log;
+import android.view.PixelCopy;
 import android.view.View;
 import android.view.Window;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,12 +18,10 @@ import java.util.Date;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
-import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
-import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.MethodChannel.Result;
 
 /**
@@ -45,8 +36,6 @@ public class FlutterNativeScreenshotPlugin
     private Activity activity;
     private Object renderer;
 
-    private boolean ssError = false;
-    private String ssPath;
 
     // Default constructor for old registrar
     public FlutterNativeScreenshotPlugin() {
@@ -127,9 +116,7 @@ public class FlutterNativeScreenshotPlugin
             result.notImplemented();
             return;
         }
-        takeScreenshotOld();
-        result.success(ssPath);
-
+        takeScreenshot(result);
     } // onMethodCall()
 
     // Own functions, plugin specific functionality
@@ -163,65 +150,77 @@ public class FlutterNativeScreenshotPlugin
 
             return path;
         } catch (Exception ex) {
-            Log.println(Log.INFO, TAG, "Error writing bitmap: " + ex.getMessage());
+            Log.println(Log.ERROR, TAG, "Error writing bitmap: " + ex.getMessage());
         }
 
         return null;
     } // writeBitmap()
 
-    private void reloadMedia() {
-        try {
-            Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-            File file = new File(this.ssPath);
-            Uri uri = Uri.fromFile(file);
+    private void takeScreenshot(@NonNull Result result) {
+        Log.println(Log.INFO, TAG, "Taking screenshot");
 
-            intent.setData(uri);
-            this.activity.sendBroadcast(intent);
-        } catch (Exception ex) {
-            Log.println(Log.INFO, TAG, "Error reloading media lib: " + ex.getMessage());
+        if (this.activity == null) {
+            Log.println(Log.ERROR, TAG, "Activity is null, cannot take screenshot.");
+            result.error("NO_ACTIVITY", "Activity is not available.", null);
+            return;
         }
-    } // reloadMedia()
-
-    private void takeScreenshotOld() {
-        Log.println(Log.INFO, TAG, "Trying to take screenshot [old way]");
 
         try {
             View view = this.activity.getWindow().getDecorView().getRootView();
 
-            view.setDrawingCacheEnabled(true);
+            Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
 
-            Bitmap bitmap = null;
-            if (this.renderer.getClass() == FlutterRenderer.class) {
-                bitmap = ((FlutterRenderer) this.renderer).getBitmap();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // Use PixelCopy for API 26+
+                Window window = this.activity.getWindow();
+                final Result finalResult = result;
+                android.os.HandlerThread handlerThread = new android.os.HandlerThread("PixelCopyThread");
+                handlerThread.start();
+
+                final Bitmap finalBitmap = bitmap;
+                PixelCopy.request(window, finalBitmap, new PixelCopy.OnPixelCopyFinishedListener() {
+                    @Override
+                    public void onPixelCopyFinished(int copyResult) {
+                        if (copyResult == PixelCopy.SUCCESS) {
+                            String path = writeBitmap(finalBitmap);
+                            if (path != null && !path.isEmpty()) {
+                                finalResult.success(path);
+                            } else {
+                                finalResult.error("WRITE_ERROR", "Failed to write bitmap to file.", null);
+                            }
+                        } else {
+                            finalResult.error("PIXEL_COPY_ERROR", "PixelCopy failed with result: " + copyResult, null);
+                        }
+                        handlerThread.quitSafely();
+                    }
+                }, new android.os.Handler(handlerThread.getLooper()));
+            } else {
+                // Fallback for older APIs: use drawing cache
+                view.setDrawingCacheEnabled(true);
+                view.buildDrawingCache();
+                Bitmap cacheBitmap = view.getDrawingCache();
+
+                if (cacheBitmap == null) {
+                    Log.println(Log.ERROR, TAG, "The bitmap cannot be created.");
+                    result.error("BITMAP_ERROR", "Failed to capture bitmap from view.", null);
+                    return;
+                }
+
+                Bitmap copy = cacheBitmap.copy(Bitmap.Config.ARGB_8888, false);
+                view.setDrawingCacheEnabled(false);
+
+                String path = writeBitmap(copy);
+                if (path == null || path.isEmpty()) {
+                    Log.println(Log.ERROR, TAG, "The bitmap cannot be written, invalid path.");
+                    result.error("WRITE_ERROR", "Failed to write bitmap to file.", null);
+                    return;
+                }
+
+                result.success(path);
             }
-
-            if (bitmap == null) {
-                this.ssError = true;
-                this.ssPath = null;
-
-                Log.println(Log.INFO, TAG, "The bitmap cannot be created :(");
-
-                return;
-            } // if
-
-            view.setDrawingCacheEnabled(false);
-
-            String path = writeBitmap(bitmap);
-            if (path == null || path.isEmpty()) {
-                this.ssError = true;
-                this.ssPath = null;
-
-                Log.println(Log.INFO, TAG, "The bitmap cannot be written, invalid path.");
-
-                return;
-            } // if
-
-            this.ssError = false;
-            this.ssPath = path;
-
-            reloadMedia();
         } catch (Exception ex) {
-            Log.println(Log.INFO, TAG, "Error taking screenshot: " + ex.getMessage());
+            Log.println(Log.ERROR, TAG, "Error taking screenshot: " + ex.getMessage());
+            result.error("SCREENSHOT_ERROR", "Error taking screenshot: " + ex.getMessage(), null);
         }
     } // takeScreenshot()
 }

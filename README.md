@@ -24,7 +24,7 @@ Untuk platform Android, Anda harus menambahkan permission berikut kedalam file *
 Dan jangan lupa tambahkan property berikut kedalam tag `application` didalam file **AndroidManifest.xml**.
 
 ```
-android;requestLegacyExternalStorage="true"
+android:requestLegacyExternalStorage="true"
 ```
 
 ### iOS

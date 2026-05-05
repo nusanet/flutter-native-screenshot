@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 
 /// Class to capture screenshots with native code working on background
 class FlutterNativeScreenshot {
-  static const MethodChannel _channel = const MethodChannel('flutter_native_screenshot');
+  static const MethodChannel _channel = MethodChannel('flutter_native_screenshot');
 
   /// Captures everything as is shown in user's device.
   ///

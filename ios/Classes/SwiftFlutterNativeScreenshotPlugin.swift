@@ -18,10 +18,25 @@ public class SwiftFlutterNativeScreenshotPlugin: NSObject, FlutterPlugin {
           let channel = FlutterMethodChannel(name: "flutter_native_screenshot", binaryMessenger: registrar.messenger())
 
           let app = UIApplication.shared
-          let controller :FlutterViewController = app.delegate!.window!!.rootViewController as! FlutterViewController
+
+          var controller: FlutterViewController?
+          if #available(iOS 13.0, *) {
+              controller = app.connectedScenes
+                  .compactMap { $0 as? UIWindowScene }
+                  .flatMap { $0.windows }
+                  .first { $0.isKeyWindow }?
+                  .rootViewController as? FlutterViewController
+          }
+          if controller == nil {
+              controller = app.delegate?.window??.rootViewController as? FlutterViewController
+          }
+
+          guard let flutterController = controller else {
+              return
+          }
 
           let instance = SwiftFlutterNativeScreenshotPlugin(
-              controller: controller,
+              controller: flutterController,
               messenger: registrar.messenger()
           ) // let instance
 
@@ -43,7 +58,7 @@ public class SwiftFlutterNativeScreenshotPlugin: NSObject, FlutterPlugin {
 
       func getScreenshotName() -> String {
           let format = DateFormatter()
-          format.dateFormat = "yyyymmddHHmmss"
+          format.dateFormat = "yyyyMMddHHmmss"
 
           let fname :String = "native_screenshot-\(format.string(from: Date())).png"
 
