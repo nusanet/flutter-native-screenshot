@@ -12,6 +12,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Widget? _imgHolder;
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
   @override
   void initState() {
@@ -24,6 +25,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: _scaffoldMessengerKey,
       home: SafeArea(
         child: Scaffold(
           appBar: AppBar(
@@ -50,7 +52,7 @@ class _MyAppState extends State<MyApp> {
   } // build()
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    _scaffoldMessengerKey.currentState?.showSnackBar(
       SnackBar(
         content: Text(message),
       ),
@@ -58,15 +60,21 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _doTakeScreenshot() async {
-    String? path = await FlutterNativeScreenshot.takeScreenshot();
-    debugPrint('Screenshot taken, path: $path');
-    if (path == null || path.isEmpty) {
-      _showSnackBar('Error taking the screenshot :(');
-      return;
-    } // if error
-    _showSnackBar('The screenshot has been saved to: $path');
-    File imgFile = File(path);
-    _imgHolder = Image.file(imgFile);
-    setState(() {});
+    _showSnackBar('Button tapped, calling takeScreenshot()...');
+    try {
+      String? path = await FlutterNativeScreenshot.takeScreenshot();
+      debugPrint('Screenshot taken, path: $path');
+      if (path == null || path.isEmpty) {
+        _showSnackBar('Error taking the screenshot :( (path was null/empty)');
+        return;
+      } // if error
+      _showSnackBar('The screenshot has been saved to: $path');
+      File imgFile = File(path);
+      _imgHolder = Image.file(imgFile);
+      setState(() {});
+    } catch (e, st) {
+      debugPrint('takeScreenshot() threw: $e\n$st');
+      _showSnackBar('EXCEPTION: $e');
+    }
   }
 } // _MyAppState

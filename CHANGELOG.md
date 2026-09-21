@@ -1,3 +1,7 @@
+## 1.3.0
+
+* Fix iOS crash on launch for apps using the UIScene lifecycle.
+
 ## 1.2.0
 
 * Update plugin support Flutter versi 3.32.8.
