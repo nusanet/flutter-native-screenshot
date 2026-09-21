@@ -2,14 +2,12 @@ import Flutter
 import UIKit
 
 public class SwiftFlutterNativeScreenshotPlugin: NSObject, FlutterPlugin {
-  var controller :FlutterViewController!
-      var messenger :FlutterBinaryMessenger
+  weak var registrar: FlutterPluginRegistrar?
       var result :FlutterResult!
       var screenshotPath :String!
 
-      init(controller: FlutterViewController, messenger: FlutterBinaryMessenger) {
-          self.controller = controller
-          self.messenger = messenger
+      init(registrar: FlutterPluginRegistrar) {
+          self.registrar = registrar
 
           super.init()
       } // init()
@@ -17,12 +15,8 @@ public class SwiftFlutterNativeScreenshotPlugin: NSObject, FlutterPlugin {
       public static func register(with registrar: FlutterPluginRegistrar) {
           let channel = FlutterMethodChannel(name: "flutter_native_screenshot", binaryMessenger: registrar.messenger())
 
-          let app = UIApplication.shared
-          let controller :FlutterViewController = app.delegate!.window!!.rootViewController as! FlutterViewController
-
           let instance = SwiftFlutterNativeScreenshotPlugin(
-              controller: controller,
-              messenger: registrar.messenger()
+              registrar: registrar
           ) // let instance
 
           registrar.addMethodCallDelegate(instance, channel: channel)
@@ -34,6 +28,18 @@ public class SwiftFlutterNativeScreenshotPlugin: NSObject, FlutterPlugin {
 
               return
           } // if
+
+          // `registrar.viewController` is the officially supported accessor for the
+          // root FlutterViewController under both classic and UIScene lifecycles; see
+          // https://docs.flutter.dev/release/breaking-changes/uiscenedelegate. It has
+          // to be read here (call time), not cached at `register(with:)` time: under
+          // UIScene, registration runs from `application(_:didFinishLaunchingWithOptions:)`,
+          // which fires before any scene has connected, so no view controller exists yet.
+          guard let controller = registrar?.viewController else {
+              result(nil)
+
+              return
+          } // guard no root FlutterViewController
 
           self.result = result
 
